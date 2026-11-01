@@ -1,0 +1,120 @@
+# TRACE-MEC configuration: single source of truth. Scripts never hardcode these values.
+project: TRACE-MEC
+seed: 20261026
+
+paths:
+  veremi_raw: data/raw/veremi_nextgen
+  hetnet_raw: data/raw/hetnet_2026
+  interim: data/interim
+  processed: data/processed
+  heldout: data/heldout
+  results: results
+  figures: figures
+  logs: logs
+  docs: docs
+
+veremi:
+  scenarios: [InTAS_highway_2, InTAS_urban_2, InTAS_highway_7, InTAS_urban_7]
+  dev_scenario: InTAS_highway_2
+  variants: [baseline, timeDelayAttack, dataReplay, dosAttack]
+  splits: [Train, Validation, Test]
+  heldout_splits: [Test]   # written to data/heldout; only evaluate.py --final may read it
+  # Zenodo naming is inconsistent across splits, so it is mapped explicitly:
+  ground_truth_files:
+    Train: "{scenario}_Train_groundTruth.json"
+    Validation: "{scenario}_Validation_groundTruth.json"
+    Test: "{scenario}_Test_ground_truth.json"
+
+hetnet:
+  archive: dataset.zip
+  n_ues: 20
+  n_gnbs: 8
+  dt_s: 0.1
+  micro_gnbs: [0, 1, 2, 3, 4, 5]   # 28 GHz FR2
+  macro_gnbs: [6, 7]               # 3.5 GHz FR1
+  gate:   # A15 regenerated traces (gate-sim binary, glibc rand); read-only source, never written
+    source_root: external/5g-handover-sim/gate_traces
+    trace_root: data/gate        # gate traces: data/gate/<variant>/{processed,heldout}
+    rows: {gate_typical: 1070, gate_fast: 290}
+
+clean:
+  chunk_rows: 500000
+  # Not extracted: present only in attack variants (format leakage) or unused receiver-side fields.
+  excluded_fields: [sender.distance_to_road_edge, receiver.pos_noise, receiver.spd_noise,
+                    receiver.acl, receiver.acl_noise, receiver.hed_noise, receiver.driversProfile]
+
+traces:   # v0.1 defaults (docs/design_traces.md); frozen at preregistration
+  min_lifetime_s: 10
+  max_speed_mps: 60        # = pooled Train/Validation p99.9 rounded up to 5 m/s (docs/speed_cap_check.txt)
+  rsrp_floor_dbm: -150.0     # out-of-coverage samples
+  report_delay_s: 0.05       # reception -> serving-edge report latency
+  evidence_item_bytes: 256   # used by model.py transfer budget
+  path_pool:                 # disjoint HetNet UE paths per split (held-out mobility)
+    Train: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+    Validation: [12, 13, 14, 15]
+    Test: [16, 17, 18, 19]
+  drop_overlap:               # same-simulation boundary vehicles
+    Train: [Validation]   # drop boundary cars from Train (labels re-drawn per split)
+  label_stats_split: Train
+  handover:
+    hysteresis_db: 3.0
+    ttt_s: 0.3
+    prep_offset_db: 0.0
+    pingpong_window_s: 1.0
+
+# Exploratory profiling only. These are NOT frozen experimental parameters.
+profiling:
+  a3_hysteresis_db: 3.0
+  a3_ttt_s: 0.3            # limited by the 0.1 s sampling
+  cho_prep_offset_db: 0.0
+  pingpong_window_s: 1.0
+
+model:   # v0.1 skeleton (src/model.py); NOT frozen until preregistration
+  item_model: {max_iter: 300, learning_rate: 0.1, max_leaf_nodes: 31, train_rows_max: 2000000}
+  llr_clip: 4.0                    # per-item |LLR| cap
+  temper_grid: [0.001, 0.002, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1.0]
+  transfer_rate_bps: 65536         # per-session security-context share of backhaul
+  rate_sweep_bps: [16384, 65536, 262144, 1048576]
+  setup_s: 0.0                     # fixed transfer setup latency
+  loss:                            # [cost if benign (x=0), cost if compromised (x=1)]
+    allow: [0.0, 5.0]
+    restrict: [0.2, 1.0]
+    quarantine: [1.0, 0.0]
+  loss_sweep:   # permanent sensitivity grid, reported in EVERY report (+ two-action per miss value)
+    miss: [2.0, 5.0, 10.0, 20.0]          # cost of allowing an attacker / cost of quarantining a benign car
+    restrict_benign: [0.1, 0.2, 0.5]      # service degradation for a restricted benign car
+    restrict_residual: [0.2, 0.5]         # fraction of attacker damage remaining when restricted
+  faults:
+    nominal:     {p_loss: 0.02, p_dup: 0.05, p_delay: 0.05, delay_mean_s: 0.3, p_suppress: 0.0, n_inject: 0}
+    adversarial: {p_loss: 0.02, p_dup: 0.05, p_delay: 0.05, delay_mean_s: 0.3, p_suppress: 0.5, n_inject: 20}   # legacy (v0.4)
+    adv_burst:        {p_loss: 0.02, p_dup: 0.05, p_delay: 0.05, delay_mean_s: 0.3, p_suppress: 0.5, n_inject: 20, inject_timing: burst, inject_sampled: true}
+    adv_sustained:    {p_loss: 0.02, p_dup: 0.05, p_delay: 0.05, delay_mean_s: 0.3, p_suppress: 0.5, n_inject: 20, inject_timing: sustained, inject_sampled: true}
+    adv_early:        {p_loss: 0.02, p_dup: 0.05, p_delay: 0.05, delay_mean_s: 0.3, p_suppress: 0.5, n_inject: 20, inject_timing: early, inject_sampled: true}
+    adv_suppress_top: {p_loss: 0.02, p_dup: 0.05, p_delay: 0.05, delay_mean_s: 0.3, p_suppress: 0.5, n_inject: 0, suppress_mode: top}
+  adversary_inject_quantile: 0.05  # injected items mimic this quantile of benign Train LLRs
+  chunk_senders: 200
+  aggregator:   # v0.2 session-level calibrated belief (replaces temper_grid, now unused)
+    C: 1.0
+    oof_folds: 3
+    hi_thresholds: [1.0, 2.5]
+    fit_methods: [no_transfer, random, fifo, ref_full_clean]   # unused since v0.3 (per-method aggregators)
+  robust:   # robust_mix v0 (heuristic); tuned on pooled Validation only
+    q_severity: 0.5
+    rb_tau: 0.0   # robust belief: only items with llr > rb_tau count (v0.6)
+  operating:   # v0.7 PRIMARY decision rule (theory.md Sec. 8B, 9, 11)
+    alpha: 0.10
+    alpha_q: 0.01
+  probe:       # v0.7 deception probe (theory.md Sec. 10-11); sweeps run in ablation.py only
+    sigma_primary: 5.0
+    sigma_s: [1.0, 5.0, 10.0]
+    false_alarm: 0.01
+    rate: 0.20
+    t_p_primary: 0.05
+    t_p_s: [0.02, 0.05, 0.10]
+    kappa: [1.0, 0.5, 0.25]
+  seeds: [0, 1, 2, 3, 4]
+
+# A16 (2026-10-28): path-fold rotation (preregistered robustness check); fixed before any output
+pathfold:
+  root: data/pathfold
+  groups: [[0, 1, 2, 3], [4, 5, 6, 7], [8, 9, 10, 11], [12, 13, 14, 15], [16, 17, 18, 19]]

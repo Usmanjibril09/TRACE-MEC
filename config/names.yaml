@@ -1,0 +1,172 @@
+# Single source of truth for every display name (figures, tables, manuscript). Edit only here.
+# report: main | secondary | variant | ablation | reference | sensitivity | excluded
+# cite_status: verified = source read in this project; to_verify = check before manuscript
+methods:
+  robust_v1+probe:      {full: "TRACE-MEC", short: "TRACE-MEC", macro: tracemec, report: main}
+  lstm_v1+probe:        {full: "TRACE-MEC with LSTM evidence scorer", short: "TRACE-MEC-LSTM", macro: tracemeclstm, report: variant}
+  fifo:                 {full: "First-in-first-out evidence transfer", short: "FIFO", macro: fifo, report: main}
+  recency:              {full: "Most-recent-first evidence transfer", short: "Recency", macro: recency, report: main}
+  severity:             {full: "Most-severe-first evidence transfer", short: "Severity", macro: severity, report: main}
+  random:               {full: "Random-order evidence transfer", short: "Random", macro: randomtx, report: main}
+  aoi:                  {full: "Age-of-information priority transfer", short: "AoI", macro: aoi, report: main, cite: kaul2012aoi, cite_status: to_verify}
+  voi_myopic:           {full: "Myopic value-of-information transfer", short: "M-VOI", macro: mvoi, report: main}
+  beta_rep:             {full: "Beta reputation trust transfer", short: "BetaRep", macro: betarep, report: secondary, cite: josang2002beta, cite_status: verified}
+  central_ma:           {full: "Central misbehavior authority with reporting delay", short: "CentralMA", macro: centralma, report: secondary, cite: TBD_central_ma, cite_status: to_verify}
+  f2md:                 {full: "F2MD plausibility checks (published thresholds)", short: "F2MD", macro: ftwomd, report: secondary, cite: kamel2020f2md, cite_status: to_verify}
+  lstm_sev:             {full: "LSTM misbehavior detector with severity transfer", short: "LSTM-Det", macro: lstmdet, report: secondary, cite: TBD_lstm_mbd, cite_status: to_verify}
+  f2md_tuned:           {full: "F2MD with Train-tuned maximum speed", short: "F2MD-T", macro: ftwomdt, report: sensitivity}
+  robust_v1:            {full: "TRACE-MEC without deception probe", short: "TRACE-MEC w/o probe", macro: tracemecnoprobe, report: ablation}
+  robust_v1+probe_rnd:  {full: "TRACE-MEC with randomly triggered deception probe", short: "TRACE-MEC (random probe)", macro: tracemecrnd, report: ablation}
+  lstm_v1:              {full: "TRACE-MEC-LSTM without deception probe", short: "TRACE-MEC-LSTM w/o probe", macro: tracemeclstmnoprobe, report: ablation}
+  fifo_rb:              {full: "FIFO transfer with robust belief", short: "FIFO+RB", macro: fiforb, report: ablation}
+  fifo_rb+probe:        {full: "FIFO transfer with robust belief and deception probe", short: "FIFO+RB+probe", macro: fiforbprobe, report: ablation}
+  severity_rb:          {full: "Severity transfer with robust belief", short: "Severity+RB", macro: severityrb, report: ablation}
+  no_transfer:          {full: "No evidence transfer", short: "No transfer", macro: notransfer, report: reference}
+  no_transfer_rb:       {full: "No evidence transfer, robust belief", short: "No transfer+RB", macro: notransferrb, report: reference}
+  no_transfer_rb+probe: {full: "No evidence transfer, robust belief and deception probe", short: "No transfer+RB+probe", macro: notransferrbprobe, report: ablation}
+  ref_full_clean:       {full: "Full transfer without adversary or deadline (oracle)", short: "Oracle", macro: oracle, report: reference}
+  ref_full_clean_rb:    {full: "Oracle transfer with robust belief", short: "Oracle+RB", macro: oraclerb, report: reference}
+  full_no_deadline:     {full: "Full transfer without deadline", short: "No deadline", macro: nodeadline, report: reference}
+  lstm_ref_rb:          {full: "Oracle transfer with robust belief on LSTM scores", short: "Oracle-LSTM+RB", macro: oraclelstmrb, report: reference}
+  robust_mix:           {full: "Retired mixed-order heuristic", short: "-", macro: robustmix, report: excluded}
+profiles:
+  nominal:          {full: "Nominal (no adversary)", short: "Nominal", report: main}
+  adv_burst:        {full: "Suppression with burst injection", short: "Burst injection", report: main}
+  adv_sustained:    {full: "Suppression with sustained injection", short: "Sustained injection", report: main}
+  adv_early:        {full: "Suppression with early injection", short: "Early injection", report: main}
+  adv_suppress_top: {full: "Top-evidence suppression", short: "Top suppression", report: main}
+  adversarial:      {full: "Legacy profile (v0.4)", short: "-", report: excluded}
+variants:
+  baseline:        {full: "No attack (dataset Baseline)", short: "No attack", cite: hermann2026veremi, cite_status: verified}
+  timeDelayAttack: {full: "Time Delay Attack", short: "Time delay"}
+  dataReplay:      {full: "Data Replay", short: "Data replay"}
+  dosAttack:       {full: "DoS Attack", short: "DoS"}
+  constantPositionOffset: {full: "Constant Position Offset", short: "Constant offset"}
+  randomPositionOffset:   {full: "Random Position Offset", short: "Random offset"}
+scenarios:   # VeReMi NextGen (Hermann et al., IEEE VNC 2026), InTAS Ingolstadt; Test = separate geographic area
+  InTAS_highway_2: {full: "Highway, 2 AM (low density)", short: "Highway-Low"}
+  InTAS_urban_2:   {full: "Urban, 2 AM (low density)", short: "Urban-Low"}
+  InTAS_highway_7: {full: "Highway, 7 AM (high density)", short: "Highway-High"}
+  InTAS_urban_7:   {full: "Urban, 7 AM (high density)", short: "Urban-High"}
+metrics:
+  loss:          {full: "Bayes risk (expected misclassification cost)", short: "Risk"}
+  nominal_mean:  {full: "Nominal risk", short: "Nominal risk"}
+  menu_mean:     {full: "Mean attack risk (16 cells)", short: "Mean attack risk"}
+  menu_worst:    {full: "Worst-case attack risk (16 cells)", short: "Worst-case risk"}
+  td_worst:      {full: "Worst-case time-delay risk", short: "Worst-case time-delay risk"}
+  honest_restrict: {full: "Honest restrict-or-quarantine share", short: "Honest restriction"}
+  miss_at_alpha: {full: "Miss rate at false-alarm level alpha", short: "Miss at alpha"}
+  belief_auc:    {full: "ROC-AUC of final belief", short: "ROC-AUC"}
+  pos_worst:     {full: "Worst-case position-attack risk", short: "Worst-case position risk"}
+terms:
+  probe:  {full: "deception probe", short: "probe", macro: dprobe}
+  rb:     {full: "robust belief", short: "RB", macro: rbelief}
+settings:
+  "primary":    {short: "Primary"}
+  "rate=0.1":   {short: "Probe rate 0.10"}
+  "rate=0.3":   {short: "Probe rate 0.30"}
+  "recal=on":   {short: "Online recalibration"}
+  "alpha=0.05": {short: "α = 0.05"}
+  "alpha=0.2":  {short: "α = 0.20"}
+  "sigma=1":    {short: "σ_s = 1 m"}
+  "sigma=10":   {short: "σ_s = 10 m"}
+  "t_p=0.02":   {short: "t_p = 20 ms"}
+  "t_p=0.1":    {short: "t_p = 100 ms"}
+  "kappa=0.5":  {short: "κ = 0.5"}
+  "kappa=0.25": {short: "κ = 0.25"}
+item_sizes:
+  256:  {short: "256 B (unsigned)"}
+  2676: {short: "2676 B (ML-DSA-44)"}
+classes:
+  honest: {short: "Honest"}
+
+evaluations:
+  test:
+    short: Test (5 seeds)
+    full: Test split, dataset handover traces, seeds 0-4
+  fold0:
+    short: Path fold 0 (seed 0)
+    full: Rotated path fold 0, seed 0
+  fold1:
+    short: Path fold 1 (seed 0)
+    full: Rotated path fold 1, seed 0
+  fold2:
+    short: Path fold 2 (seed 0)
+    full: Rotated path fold 2, seed 0
+  fold3:
+    short: Path fold 3 (seed 0)
+    full: Rotated path fold 3, seed 0
+  fold4:
+    short: Path fold 4 = primary (seed 0)
+    full: Path fold 4 (primary split), seed 0
+  gate_fast:
+    short: Re-simulated, fast (5 seeds)
+    full: Re-simulated handover traces, fast speed level, seeds 0-4
+  gate_typical:
+    short: Re-simulated, typical (5 seeds)
+    full: Re-simulated handover traces, typical speed level, seeds 0-4
+  pqc:
+    short: ML-DSA-44, 2676 B (seed 0)
+    full: Item size 2676 B (ML-DSA-44 signature), seed 0
+parameters:
+  sigma:
+    short: Sensor noise $\sigma_s$ (m)
+    full: Sensor noise $\sigma_s$ (m)
+  kappa:
+    short: Attacker lag scale $\kappa$
+    full: Attacker lag scale $\kappa$
+  alpha:
+    short: Target honest share $\alpha$
+    full: Target honest share $\alpha$
+fig_labels:
+  tpr10: {short: "TPR at 10% FPR (%)", full: "TPR at 10% FPR (%)"}
+  t_tpr10: {short: "Detection at fixed false positives", full: "Detection at fixed false positives"}
+  zero_bytes: {short: "0 B on handover link", full: "0 B on handover link"}
+  bytes:
+    short: Bytes per decision
+    full: Bytes per decision
+  deadline:
+    short: Deadline met (%)
+    full: Deadline met (%)
+  honest:
+    short: Honest vehicles restricted (%)
+    full: Honest vehicles restricted (%)
+  detect:
+    short: Time-delay detection among probed (%)
+    full: Time-delay detection among probed (%)
+  poserr:
+    short: Induced position error, $\kappa\times$median lag (m)
+    full: Induced position error, $\kappa\times$median lag (m)
+  t_sigma:
+    short: Probe sensor noise
+    full: Probe sensor noise
+  t_kappa:
+    short: Adaptive attacker
+    full: Adaptive attacker
+  t_alpha:
+    short: Operating point
+    full: Operating point
+  t_trade:
+    short: Detection vs induced error
+    full: Detection vs induced error
+  t_honest:
+    short: Honest restrict share
+    full: Honest restrict share
+  t_folds:
+    short: Honest share across path folds
+    full: Honest share across path folds
+  t_bytes:
+    short: Transfer bytes
+    full: Transfer bytes
+  t_deadline:
+    short: Deadline met
+    full: Deadline met
+  primary_thr:
+    short: Training threshold
+    full: Training threshold
+  recal:
+    short: Online recalibration
+    full: Online recalibration
+  target:
+    short: Target $\alpha$
+    full: Target $\alpha$

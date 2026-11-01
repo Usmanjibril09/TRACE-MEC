@@ -1,0 +1,12 @@
+cff-version: 1.2.0
+message: "Please cite the manuscript and both original datasets when using this software."
+title: "TRACE-MEC research code"
+type: software
+version: "1.0.0"
+date-released: "2026-10-30"
+authors:
+  - name: "Usman J. Wushishi"
+  - name: "Chenquan Gan"
+  - name: "Shuaiyong Li"
+  - name: "Hussain Altaf"
+license: LicenseRef-TRACE-MEC-Research-Reproduction-1.0

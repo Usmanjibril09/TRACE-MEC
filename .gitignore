@@ -1,0 +1,14 @@
+data/
+.venv*/
+logs/
+__pycache__/
+*.pyc
+.DS_Store
+*.bak*
+results/**/*.parquet
+results/**/*.pkl
+results/**/*.pt
+manuscript/*.aux
+manuscript/*.log
+manuscript/*.out
+manuscript/*.synctex.gz

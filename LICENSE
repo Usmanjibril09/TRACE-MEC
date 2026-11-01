@@ -1,0 +1,25 @@
+TRACE-MEC Research Reproduction License, Version 1.0
+Copyright (c) 2026 TRACE-MEC copyright holders. All rights reserved except as expressly granted below.
+
+1. Limited permission
+Subject to these terms, you may download, inspect, make private copies of, and execute this original TRACE-MEC software solely for noncommercial reproduction, verification, or evaluation of the research results reported in the accompanying TRACE-MEC research work. This permission does not extend to unrelated research projects, operational deployment, products, or services.
+
+2. No code modifications
+You may not alter source code, create derivative software, incorporate it into other software, or distribute patches without prior written authorization from the relevant copyright holders. You may install required dependencies and use documented command-line options and input paths to execute the unmodified code for the permitted reproduction purpose. These execution settings do not authorize source-code changes.
+
+3. Prohibited uses
+Without separate prior written authorization, you may not sell, sublicense, rent, commercially exploit, provide a hosted service using, redistribute, publicly mirror, or distribute modified or unmodified copies of the software. Do not use the software for commercial advantage, revenue-generating activities, or product/service development. Refer others to the authorized release location instead of redistributing copies. No patent or trademark license is granted.
+
+4. Reporting and attribution
+You may publish your own reproduction findings, aggregate measurements, and descriptions of execution settings without redistributing the software. Identify the TRACE-MEC work and code version used, retain copyright and license notices in private copies, and clearly distinguish your reproduction from the original authors' results. No endorsement by the authors is implied. Do not redistribute third-party data or other protected materials without their owners' permission.
+
+5. Third-party materials and statutory rights
+These terms cover only original TRACE-MEC material that the relevant copyright holders are authorized to license. Dependencies, datasets, and external simulator software retain their own terms. Nothing here limits rights that applicable law does not allow a license to restrict.
+
+6. Termination
+Permission terminates if you breach these terms. Stop using the software and remove copies in your possession, except copies that applicable law requires you to retain. All rights not expressly granted are reserved.
+
+7. No warranty
+The software is provided "AS IS", without warranties of any kind, to the extent permitted by applicable law. The copyright holders are not liable for claims or damages arising from use of the software, to the extent permitted by applicable law.
+
+Release classification: restricted source-available research software; not an open-source license. Any broader permission requires written authorization from the relevant copyright holders.
